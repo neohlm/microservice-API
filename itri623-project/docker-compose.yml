@@ -93,6 +93,20 @@ services:
     networks:
       - itri623-net
 
+  soc-db:
+    image: postgres:16-alpine
+    container_name: soc-db
+    environment:
+      POSTGRES_DB: socdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5436:5432"
+    volumes:
+      - soc-db-data:/var/lib/postgresql/data
+    networks:
+      - itri623-net
+
   # ---------- API Gateway ----------
   gateway:
     build: ./gateway

@@ -16,6 +16,7 @@
         <module>user-service</module>
         <module>ticket-service</module>
         <module>asset-service</module>
+        <module>soc-event-service</module>
     </modules>
 
     <properties>
