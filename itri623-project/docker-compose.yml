@@ -44,6 +44,20 @@ services:
     networks:
       - itri623-net
 
+  soc-event-db:
+    image: postgres:16-alpine
+    container_name: soc-event-db
+    environment:
+      POSTGRES_DB: soc_eventdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5436:5432"
+    volumes:
+      - soc-event-db-data:/var/lib/postgresql/data
+    networks:
+      - itri623-net
+
   # ---------- Service Registry ----------
   eureka-server:
     build: ./eureka-server
@@ -93,17 +107,14 @@ services:
     networks:
       - itri623-net
 
-  soc-db:
-    image: postgres:16-alpine
-    container_name: soc-db
-    environment:
-      POSTGRES_DB: socdb
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+  soc-event-service:
+    build: ./soc-event-service
+    container_name: soc-event-service
+    depends_on:
+      - eureka-server
+      - soc-db
     ports:
-      - "5436:5432"
-    volumes:
-      - soc-db-data:/var/lib/postgresql/data
+      - "8084:8084"
     networks:
       - itri623-net
 
