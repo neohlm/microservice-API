@@ -5,7 +5,7 @@ spring:
   application:
     name: soc-event-service
   datasource:
-    url: jdbc:postgresql://soc-db:5432/socdb
+    url: jdbc:postgresql://soc-event-db:5432/soc_eventdb
     username: postgres
     password: postgres
   jpa:

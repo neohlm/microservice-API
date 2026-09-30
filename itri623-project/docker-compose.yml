@@ -112,7 +112,7 @@ services:
     container_name: soc-event-service
     depends_on:
       - eureka-server
-      - soc-db
+      - soc-event-db
     ports:
       - "8084:8084"
     networks:
@@ -140,3 +140,4 @@ volumes:
   user-db-data:
   asset-db-data:
   ticket-db-data:
+  soc-event-db-data:
