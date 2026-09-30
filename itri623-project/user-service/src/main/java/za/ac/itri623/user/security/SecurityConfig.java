@@ -10,15 +10,18 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.http.HttpMethod;
+import za.ac.itri623.user.soc.SocAccessDeniedHandler;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
+    private final SocAccessDeniedHandler socAccessDeniedHandler;
 
     public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
+        this.socAccessDeniedHandler = socAccessDeniedHandler;
     }
 
     @Bean
@@ -36,6 +39,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasAuthority("ROLE_ADMIN")
                 .anyRequest().permitAll() // demo default-open; tighten per-endpoint as needed
             )
+            .exceptionHandling(ex -> ex.accessDeniedHandler(socAccessDeniedHandler))
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
