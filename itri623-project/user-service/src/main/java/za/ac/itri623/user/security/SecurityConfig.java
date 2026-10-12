@@ -19,7 +19,7 @@ public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
     private final SocAccessDeniedHandler socAccessDeniedHandler;
 
-    public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
+    public SecurityConfig(JwtAuthFilter jwtAuthFilter, SocAccessDeniedHandler socAccessDeniedHandler) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.socAccessDeniedHandler = socAccessDeniedHandler;
     }

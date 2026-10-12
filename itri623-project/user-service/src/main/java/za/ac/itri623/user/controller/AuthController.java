@@ -20,7 +20,7 @@ public class AuthController {
     private final SocEventClient socEventClient;
 
     public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder,
-                            JwtUtil jwtUtil, SocEventClient socEventClient) {
+                           JwtUtil jwtUtil, SocEventClient socEventClient) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
