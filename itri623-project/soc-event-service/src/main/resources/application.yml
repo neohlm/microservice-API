@@ -32,3 +32,13 @@ management:
   endpoint:
     health:
       show-details: always
+
+soc:
+  rules:
+    window-minutes: 5
+    failed-login-threshold: 5
+    unauthorised-threshold: 3
+    request-rate-threshold: 30
+    request-rate-window-seconds: 60
+    service-failure-threshold: 3
+    interval-ms: 15000
