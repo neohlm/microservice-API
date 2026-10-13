@@ -1,7 +1,8 @@
 import os, logging, threading, time
 import requests
 from fastapi import FastAPI, HTTPException
-from . import graph, queries
+from . import graph, queries, rag
+from pydantic import BaseModel
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("graph-service")
@@ -37,6 +38,7 @@ def startup():
     for attempt in range(30):          # Neo4j takes a while to accept connections
         try:
             graph.seed()
+            rag.init()
             break
         except Exception as e:
             log.warning("waiting for Neo4j (%s)", e)
@@ -85,3 +87,17 @@ def evidence(alert_id: str):
     if not r or r[0]["alertId"] is None:
         raise HTTPException(404, "alert not in graph")
     return r[0]
+
+
+class Question(BaseModel):
+    question: str
+
+
+@app.post("/rag/ask")
+def rag_ask(q: Question):
+    return rag.ask(q.question)
+
+
+@app.get("/rag/ask")
+def rag_ask_get(q: str):
+    return rag.ask(q)

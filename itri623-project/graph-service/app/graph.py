@@ -17,6 +17,9 @@ RULE_TO_THREAT = {
 }
 
 
+RULE_TO_THREAT_NAME = {"T-01": "credential attack", "T-02": "unauthorised access", "T-03": "resource exhaustion"}
+
+
 def run(query, **params):
     with driver.session() as s:
         return [r.data() for r in s.run(query, **params)]
@@ -78,3 +81,12 @@ def upsert_alert(alert, events_by_id):
     tid = RULE_TO_THREAT.get(alert.get("ruleName"))
     if tid:
         run("MATCH (a:Alert {id:$a}),(t:Threat {id:$t}) MERGE (a)-[:INDICATES]->(t)", a=aid, t=tid)
+    if tid:
+        key = alert.get("affectedUser") or alert.get("affectedService") or "unknown"
+        run("""
+            MATCH (a:Alert {id:$a}),(t:Threat {id:$t})
+            MERGE (i:Incident {id:$inc})
+            SET i.name=$name, i.status='OPEN'
+            MERGE (i)-[:CONTAINS]->(a)
+            """, a=aid, t=tid, inc=f"INC-{tid}-{key}",
+            name=f"Possible {RULE_TO_THREAT_NAME.get(tid, tid)} involving {key}")
