@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import za.ac.itri623.ticket.soc.SocEventClient;
 
 @Component
 public class AssetClient {
@@ -13,8 +14,11 @@ public class AssetClient {
 
     private final WebClient.Builder webClientBuilder;
 
-    public AssetClient(WebClient.Builder webClientBuilder) {
+    private final SocEventClient soc;   // add the field, and add SocEventClient soc to the constructor
+
+    public AssetClient(WebClient.Builder webClientBuilder, SocEventClient soc) {
         this.webClientBuilder = webClientBuilder;
+        this.soc = soc;  // assign the parameter to the field
     }
 
     @CircuitBreaker(name = "assetService", fallbackMethod = "fallbackAsset")
@@ -29,10 +33,14 @@ public class AssetClient {
 
     public AssetDto fallbackAsset(Long assetId, Throwable t) {
         log.error("Asset Service call failed for assetId={}, falling back. Cause: {}", assetId, t.toString(), t);
+        soc.emit("ticket-service", "SERVICE_FAILURE", "HIGH", null, null,
+            "/api/assets/" + assetId, "GET", 503,
+            "Asset Service unavailable, circuit breaker fallback used", "asset-service");
         AssetDto placeholder = new AssetDto();
         placeholder.setId(assetId);
         placeholder.setName("UNKNOWN (Asset Service unavailable)");
         placeholder.setStatus("UNVERIFIED");
         return placeholder;
     }
+
 }
