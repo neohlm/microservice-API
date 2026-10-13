@@ -33,13 +33,13 @@ public class GatewaySocFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        return Ordered.LOWEST_PRECEDENCE;
+        return -1;   // run first so the doFinally fires after the whole chain, regardless of other filters
     }
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String path = exchange.getRequest().getURI().getPath();
-        if (!path.startsWith("/api/")) {
+        if (path.startsWith("/actuator")) {
             return chain.filter(exchange);
         }
         return chain.filter(exchange).doFinally(sig -> {
@@ -70,6 +70,7 @@ public class GatewaySocFilter implements GlobalFilter, Ordered {
 
     private void emit(String type, String severity, String user, String ip, String endpoint,
                       String method, Integer status, String message) {
+        log.info("SOC gateway event {} {} {} -> {}", type, method, endpoint, status);
         Map<String, Object> ev = new HashMap<>();
         ev.put("serviceName", "api-gateway");
         ev.put("eventType", type);

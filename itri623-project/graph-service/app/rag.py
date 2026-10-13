@@ -134,8 +134,11 @@ def route_b(question, k=3):
     users = sorted({u for o in ops for u in o["users"]})
     services = sorted({s for o in ops for s in o["services"]})
 
-    observed = (f"The graph holds {len(alerts)} alert(s) consistent with {t['name']}: {_join(alerts)}"
-                + (f", linked to user(s) {_join(users)} on service(s) {_join(services)}." if alerts else "."))
+    detail = ""
+    if alerts:
+        detail = (f", linked to user(s) {_join(users)} " if users else ", with no individual user attributed ") \
+                 + f"on service(s) {_join(services)}"
+    observed = f"The graph holds {len(alerts)} alert(s) consistent with {t['name']}: {_join(alerts)}{detail}."
     interpretation = (f"Your question best matches the knowledge passage \"{best['passage']}\" "
                       f"(source: {best['source']}). This relates to {t['name']} ({t.get('referenceId')}), which may target "
                       f"{_join(best['targets'])}. Alerts linked to it are consistent with this threat, not proof of it.")
