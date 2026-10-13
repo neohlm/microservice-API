@@ -28,9 +28,12 @@ public class SocAccessDeniedHandler implements AccessDeniedHandler {
             throws IOException {
         String username = (request.getUserPrincipal() != null) ? request.getUserPrincipal().getName() : "unknown";
 
+        String xff = request.getHeader("X-Forwarded-For");
+        String ip = (xff != null && !xff.isBlank()) ? xff.split(",")[0].trim() : request.getRemoteAddr();
+
         socEventClient.emit(
                 "user-service", "UNAUTHORISED_ACCESS", "HIGH", username,
-                request.getRemoteAddr(), request.getRequestURI(), request.getMethod(), 403,
+                ip, request.getRequestURI(), request.getMethod(), 403,
                 "User attempted to access a protected endpoint without sufficient authority",
                 request.getRequestURI()
         );

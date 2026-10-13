@@ -20,27 +20,33 @@ public class AuthController {
     private final SocEventClient socEventClient;
 
     public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder,
-                           JwtUtil jwtUtil, SocEventClient socEventClient) {
+                        JwtUtil jwtUtil, SocEventClient socEventClient) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.socEventClient = socEventClient;
     }
 
+    private String clientIp(HttpServletRequest req) {
+        String xff = req.getHeader("X-Forwarded-For");
+        return (xff != null && !xff.isBlank()) ? xff.split(",")[0].trim() : req.getRemoteAddr();
+    }
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpServletRequest httpRequest) {
+        final String ip = clientIp(httpRequest);
         return userRepository.findByUsername(request.getUsername())
                 .filter(u -> passwordEncoder.matches(request.getPassword(), u.getPassword()))
                 .<ResponseEntity<?>>map(u -> {
                     socEventClient.emit("user-service", "AUTH_SUCCESS", "LOW", u.getUsername(),
-                            httpRequest.getRemoteAddr(), "/api/auth/login", "POST", 200,
+                            ip, "/api/auth/login", "POST", 200,
                             "Successful login", "login-endpoint");
                     return ResponseEntity.ok(new LoginResponse(
                             jwtUtil.generateToken(u.getUsername(), u.getRole()), u.getUsername(), u.getRole()));
                 })
                 .orElseGet(() -> {
                     socEventClient.emit("user-service", "AUTH_FAILURE", "MEDIUM", request.getUsername(),
-                            httpRequest.getRemoteAddr(), "/api/auth/login", "POST", 401,
+                            ip, "/api/auth/login", "POST", 401,
                             "Failed login attempt", "login-endpoint");
                     return ResponseEntity.status(401).body("Invalid username or password");
                 });
